@@ -1,10 +1,24 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
+  <MainHeader />
   <router-view/>
 </template>
+
+<script>
+import MainHeader from '@/components/MainHeader.vue';
+
+export default {
+  name: 'MainApp',
+  components: {
+    MainHeader
+  },
+  data() {
+    return {
+    }
+  },
+  mounted() {
+  }
+}
+</script>
 
 <style>
 #app {
@@ -19,12 +33,38 @@ nav {
   padding: 30px;
 }
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.button-clear {
+  margin-bottom: 5px;
 }
 
-nav a.router-link-exact-active {
-  color: #42b983;
+.false-text {
+  color: red;
 }
+
+.form-group {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.btn-block {
+  margin-left: 10px;
+}
+
+.btn-row {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.form-box {
+  margin-top: 20px;
+}
+
+.form-label {
+  text-align: left;
+}
+
+.page-title {
+  margin-top: 10px;
+}
+
 </style>
