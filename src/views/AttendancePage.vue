@@ -1,6 +1,7 @@
 <template>
 	<h1 class="page-title">{{ pageTitle }}</h1>
-	<div class="container-fluid" v-if="mapChecked">
+	<div class="container-fluid" v-if="mapChecked && userProfile">
+		<!--{{ userProfile }}-->
 		<div class="btn-row">
 			<button type="button" class="btn btn-success btn-block" v-if="!checkedIn">
 				<font-awesome-icon :icon="['fas', 'clock']"/> ลงเวลาเข้า
@@ -37,32 +38,41 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import helper from '@/helpers/helper';
 import getCurrentLocationWithTimeout, { TimeoutError } from 'get-location-with-timeout'
+import UserService from '@/services/user.service';
 
 export default {
 	name: 'AttendancePage',
 	async mounted() {
 		try {
 			helper.loadingAlert("กำลังตรวจสอบตำแหน่งปัจจุบัน");
+
 			const { coords } = await getCurrentLocationWithTimeout()
 			this.latitudeCurrent = coords.latitude;
 			this.longitudeCurrent = coords.longitude;
 			this.positionCurrent = { lat: this.latitudeCurrent, lng: this.longitudeCurrent };
 			this.mapChecked = true;
+
+			UserService.getUser(this.userProfile.userId).then(
+				response => {
+					console.log(response);
+				}
+			)
+
 			helper.closeAlert();
 		} catch (error) {
 			if (error instanceof TimeoutError) {
 				helper.failAlert("ไม่สำเร็จ", "Connection Timed Out.")
 			} else {
-				helper.failAlert("ไม่สำเร็จ", "ไม่สามารถตรวจสอบตำแหน่งปัจจุบันได้")
+				helper.failAlert("ไม่สำเร็จ", error)
 			}
 		}
 	},
 	data() {
 		return {
 			pageTitle: 'ลงเวลาปฏิบัติงาน',
-			profile: {},
 			email: "",
 			isHidden: true,
 			isEmail: false,
@@ -105,6 +115,9 @@ export default {
 				fillOpacity: 0.35
 			}
 		}
+	},
+	computed: {
+		...mapGetters(['userProfile'])
 	}
 }
 </script>
