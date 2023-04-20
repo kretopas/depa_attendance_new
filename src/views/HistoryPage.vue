@@ -9,7 +9,6 @@
 				</button>
 			</router-link>
 		</div>
-		<br/><br/>
 		<div class="form-box">
 			<table width="80%" class="table table-bordered table-hover" v-if="historyLists">
 				<thead class="table-dark">

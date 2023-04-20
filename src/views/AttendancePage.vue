@@ -12,13 +12,13 @@
 				<font-awesome-icon :icon="['fas', 'clock-rotate-left']"/> ลงเวลาออก
 			</button>
 			<button type="button" class="btn btn-info btn-block" v-if="!isWFH" @click="isModal = true">
-				ลงทะเบียนปฏิบัติงานนอกสถานที่
+				<font-awesome-icon :icon="['fas', 'location-dot']"/> ปฏิบัติงานนอกสถานที่
 			</button>
 		</div>
 		<teleport to="body">
 			<div class="modal" v-if="isModal">
 				<div>
-					<h2> ลงทะเบียนปฏิบัติงานนอกสถานที่ </h2>
+					<h3 align="center"> ลงทะเบียนปฏิบัติงานนอกสถานที่ </h3>
 					<form class="form-box">
 						<div class="form-group row">
 							<label for="latitudeWFH" class="col-sm-2 col-form-label">ละติจูด</label>
@@ -37,9 +37,13 @@
 							</div>
 						</div>
 					</form>
-					<div class="btn-row">
-						<button type="button" class="btn btn-success btn-block">ลงทะเบียน</button>
+					<div class="btn-row" align="center">
+						<button type="button" class="btn btn-success btn-block" @click="registerCoordinate">ลงทะเบียน</button>
 						<button type="button" class="btn btn-danger btn-block" @click="isModal = false">ยกเลิก</button>
+					</div>
+					<div class="form-box" align="center">
+						<span class="false-text">*หมายเหตุ: </span>สามารถลงทะเบียนได้เพียงครั้งเดียวเท่านั้น<br/>
+						หากต้องการเปลี่ยนพิกัด กรุณาติดต่อฝ่ายทรัพยากรองค์กรและบุคคล
 					</div>
 				</div>
 			</div>
@@ -335,9 +339,29 @@ export default {
 				}
 			}
 		},
-		changeToHistory() {
-			this.$router.push("/history");
-		},
+		registerCoordinate() {
+			Swal.fire({
+				icon: 'question',
+				text: 'ลงทะเบียนพิกัดนี้ เพื่อใช้สำหรับลงเวลาปฏิบัติงานนอกสถานที่หรือไม่?',
+				confirmButtonText: 'ยืนยัน',
+				showCancelButton: true,
+				cancelButtonText: 'ยกเลิก'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					helper.loadingAlert();
+					AttendanceService.registerCoordinate(this.userProfile.userId, this.positionCurrent).then(
+						() => {
+							helper.successAlert(undefined, 'ลงทะเบียนพิกัดของคุณแล้ว', () => {
+								location.reload();
+							})
+						},
+						(error) => {
+							helper.failAlert(undefined, error);
+						}
+					)
+				}
+			});
+		}
 	},
 	computed: {
 		...mapGetters(['userProfile'])

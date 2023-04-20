@@ -9,8 +9,8 @@ class AttendanceService {
 	 */
 	registerCoordinate(userId, position) {
 		return api.get(`registerCoordinate/?userId=${userId}&latitude=${position.lat}&longitude=${position.lng}`).then(
-			response => {
-				console.log(response);
+			() => {
+				return true;
 			},
 			() => {
 				return Promise.reject('ไม่สามารถลงทะเบียนพิกัดได้');
