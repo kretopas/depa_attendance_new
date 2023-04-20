@@ -111,11 +111,7 @@ export default {
 				})
 			}
 		} catch (error) {
-			if (error instanceof TimeoutError) {
-				helper.failAlert("ไม่สำเร็จ", "Connection Timed Out.")
-			} else {
-				helper.failAlert("ไม่สำเร็จ", error)
-			}
+			helper.failAlert("ไม่สำเร็จ", error)
 		}
 	},
 	data() {
