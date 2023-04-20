@@ -26,11 +26,4 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  const requiresUser = to.matched.some((x) => x.meta.requiresUser);
-  console.log(requiresUser);
-
-  next();
-})
-
 export default router

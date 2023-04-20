@@ -1,12 +1,14 @@
 <template>
 	<h1 class="page-title">{{ pageTitle }}</h1>
-	<div class="container-fluid" v-if="mapChecked && userProfile">
-		<!--{{ userProfile }}-->
+	<div class="container-fluid" v-if="isMapChecked && userProfile">
+		<!--<div class="btn-row">
+			<button @click="$modal.show('coordinate-modal')" v-if="!isWFH" class="btn btn-info"> ลงทะเบียน Work from Home </button>
+		</div>-->
 		<div class="btn-row">
-			<button type="button" class="btn btn-success btn-block" v-if="!checkedIn">
+			<button type="button" class="btn btn-success btn-block" v-if="!isCheckedIn" @click="timeRecord">
 				<font-awesome-icon :icon="['fas', 'clock']"/> ลงเวลาเข้า
 			</button>
-			<button type="button" class="btn btn-danger btn-block" v-else>
+			<button type="button" class="btn btn-danger btn-block" v-else @click="timeRecord">
 				<font-awesome-icon :icon="['fas', 'clock-rotate-left']"/> ลงเวลาออก
 			</button>
 		</div>
@@ -23,15 +25,11 @@
 			:draggable="false"
 			/>
 			<GMapCircle
+			v-for="(pin, index) in circlePositions"
+			:key="index"
+			:center="pin"
 			:radius="requiresDistance"
-			:center="{lat: latitudeOffice, lng: longitudeOffice}"
 			:options="circleOptions"
-			/>
-			<GmapCircle
-			:radius="requiresDistance"
-			:center="{lat: latitudeWFH, lng: longitudeWFH}"
-			:options="circleOptions"
-			v-if="isWFH"
 			/>
 		</GMapMap>
 	</div>
@@ -39,29 +37,34 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import liff from '@line/liff';
+import Swal from 'sweetalert2';
 import helper from '@/helpers/helper';
 import getCurrentLocationWithTimeout, { TimeoutError } from 'get-location-with-timeout'
 import UserService from '@/services/user.service';
+import AttendanceService from '@/services/attendance.service';
 
 export default {
 	name: 'AttendancePage',
 	async mounted() {
 		try {
 			helper.loadingAlert("กำลังตรวจสอบตำแหน่งปัจจุบัน");
-
 			const { coords } = await getCurrentLocationWithTimeout()
-			this.latitudeCurrent = coords.latitude;
-			this.longitudeCurrent = coords.longitude;
-			this.positionCurrent = { lat: this.latitudeCurrent, lng: this.longitudeCurrent };
-			this.mapChecked = true;
-
-			UserService.getUser(this.userProfile.userId).then(
-				response => {
-					console.log(response);
+			const position = {lat: coords.latitude, lng: coords.longitude};
+			this.positionCurrent = position;
+			this.isMapChecked = true;
+			AttendanceService.getAllLocation().then(
+				(locations) => {
+					locations.forEach((location) => {
+						this.circlePositions.push({lat: parseFloat(location.latitude), lng: parseFloat(location.longitude)});
+					})
+				},
+				(error) => {
+					helper.failAlert(undefined, error);
 				}
 			)
-
 			helper.closeAlert();
+			this.checkUser();
 		} catch (error) {
 			if (error instanceof TimeoutError) {
 				helper.failAlert("ไม่สำเร็จ", "Connection Timed Out.")
@@ -73,22 +76,12 @@ export default {
 	data() {
 		return {
 			pageTitle: 'ลงเวลาปฏิบัติงาน',
-			email: "",
-			isHidden: true,
-			isEmail: false,
 			isWFH: false,
-			checkedIn: false,
-			mapChecked: false,
-			latitudeCurrent: 0,
-			longitudeCurrent: 0,
-			positionCurrent: {lat: 0, lng: 0},
-			latitudeOffice: parseFloat(process.env.VUE_APP_LATITUDE_OFFICE),
-			longitudeOffice: parseFloat(process.env.VUE_APP_LONGITUDE_OFFICE),
-			latitudeWFH: parseFloat(process.env.VUE_APP_LATITUDE_WFH),
-			longitudeWFH: parseFloat(process.env.VUE_APP_LONGITUDE_WFH),
-			distanceOffice: parseFloat(process.env.VUE_APP_DISTANCE_OFFICE),
-			distanceWFH: parseFloat(process.env.VUE_APP_DISTANCE_WFH),
-			distance: parseFloat(process.env.VUE_APP_DISTANCE),
+			isCheckedIn: false,
+			isMapChecked: false,
+			positionCurrent: {},
+			positionWFH: {},
+			circlePositions: [],
 			requiresDistance: 300,
 			startCheckIn: process.env.VUE_APP_START_CHECKIN_TIME,
 			startCheckOut: process.env.VUE_APP_START_CHECKOUT_TIME,
@@ -113,6 +106,191 @@ export default {
 				strokeWeight: 2,
 				fillColor: "#ADD8E6",
 				fillOpacity: 0.35
+			}
+		}
+	},
+	methods: {
+		checkRegisterData(empCode, email) {
+			var check = false;
+			var message = '';
+			if (!helper.isNumeric(empCode)) {
+				message = 'กรุณากรอกรหัสพนักงานเป็นตัวเลขเท่านั้น';
+			} else if (email.split("@")[1] != "depa.or.th") {
+				message = 'กรุณากรอกอีเมลด้วยโดเมน @depa.or.th';
+			} else {
+				check = true;
+			}
+			return {status: check, error: message}
+		},
+		checkUser() {
+			UserService.getUser(this.userProfile.userId).then(
+				async (data) => {
+					if (data) {
+						this.isCheckedIn = Boolean(parseInt(data.checked));
+						if (data.latitude_WFH != null && data.longitude_WFH != null) {
+							const position = {lat: parseFloat(data.latitude_WFH), lng: parseFloat(data.longitude_WFH)};
+							this.circlePositions.push(position);
+							this.positionWFH = position;
+							this.isWFH = true;
+						}
+					} else {
+						const steps = ['1', '2']
+						const questions = ['กรุณากรอกรหัสพนักงาน', ['กรุณากรอกอีเมลพนักงาน']]
+						const inputHolder = ['รหัสพนักงาน', 'อีเมลพนักงาน (@depa.or.th)']
+						const inputMaxLength = [7, 50]
+						const swalQueueStep = Swal.mixin({
+							confirmButtonText: 'ถัดไป',
+							cancelButtonText: 'ย้อนกลับ',
+							progressSteps: steps,
+							input: 'text',
+							inputAttributes: {
+								required: true
+							},
+							reverseButtons: true,
+							validationMessage: 'This field is required'
+						})
+						let inputs = []
+						let currentStep;
+						for (currentStep = 0; currentStep < steps.length;) {
+							const result = await swalQueueStep.fire({
+								title: `${questions[currentStep]}`,
+								inputValue: inputs[currentStep],
+								showCancelButton: currentStep > 0,
+								currentProgressStep: currentStep,
+								inputPlaceholder: `${inputHolder[currentStep]}`,
+								inputAttributes: {
+									maxLength: `${inputMaxLength[currentStep]}`
+								}
+							})
+
+							if (result.value) {
+								inputs[currentStep] = result.value;
+								currentStep++;
+							} else if (result.dismiss === Swal.DismissReason.cancel) {
+								currentStep--;
+							} else {
+								break;
+							}
+						}
+						if (currentStep === steps.length) {
+							if (inputs[0] && inputs[1]) {
+								const registerEmpCode = inputs[0];
+								const registerEmail = inputs[1].toLowerCase();
+								const checkResult = this.checkRegisterData(registerEmpCode, registerEmail);
+								if (checkResult.status == true) {
+									helper.loadingAlert();
+									UserService.addUser(this.userProfile.userId, registerEmpCode, registerEmail).then(
+										async (user) => {
+											if (user) {
+												helper.successAlert(undefined, `ทำการผูกบัญชีกับอีเมล ${registerEmail} แล้ว`)
+											} else {
+												Swal.fire({
+													icon: 'question',
+													text: 'รหัสพนักงานนี้ถูกใช้งานแล้ว ท่านต้องการแทนที่หรือไม่?',
+													confirmButtonText: 'ยืนยัน',
+													showCancelButton: true,
+													cancelButtonText: 'ยกเลิก'
+												}).then((result) => {
+													if (result.isConfirmed) {
+														UserService.updateUser(this.userProfile.userId, registerEmpCode, registerEmail).then(
+															async (update) => {
+																if (update) {
+																	helper.successAlert(undefined, `ทำการผูกบัญชีใหม่กับอีเมล ${registerEmail} แล้ว`)
+																} else {
+																	helper.failAlertWithCallback(undefined, 'อีเมลที่กรอก ไม่ตรงกับในฐานข้อมูล')
+																}
+															},
+															(error) => {
+																helper.failAlertWithCallback(undefined, error)
+															}
+														)
+													} else {
+														location.reload();
+													}
+												})
+											}
+										},
+										(error) => {
+											helper.failAlertWithCallback(undefined, error)
+										}
+									)
+								} else {
+									helper.failAlertWithCallback(undefined, checkResult.error)
+								}
+							} else {
+								helper.failAlertWithCallback(
+									'ไม่สำเร็จ',
+									'กรุณากรอกรหัสพนักงานและอีเมลให้เรียบร้อย'
+								)
+							}
+						}
+					}
+				},
+				(error) => {
+					helper.failAlert(undefined, error);
+				}
+			)
+		},
+		checkTime() {
+			const today = new Date();
+			const time = today.getHours();
+			if (!this.isCheckedIn) {
+				if (time >= this.startCheckIn && time < this.endCheckIn) {
+					return true;
+				}
+			} else {
+				if (time >= this.startCheckOut && time < this.endCheckOut) {
+					return true;
+				}
+			}
+			return false;
+		},
+		async timeRecord() {
+			if (this.checkTime()) {
+				helper.loadingAlert();
+				const distanceOffice = await AttendanceService.checkLocationOffice(this.positionCurrent).then(
+					(distance) => {
+						if (distance <= this.requiresDistance) {
+							return true;
+						} else {
+							return false;
+						}
+					},
+					(error) => {
+						helper.failAlert(undefined, error);
+					}
+				)
+				const distanceWFH = this.isWFH ? 
+									(AttendanceService.checkLocationWFH(
+										this.positionCurrent,
+										this.positionWFH) <= this.requiresDistance) :
+									false;
+
+				if (distanceOffice || distanceWFH) {
+					AttendanceService.insertTimeRecord(
+						this.userProfile.userId,
+						this.positionCurrent,
+						this.isCheckedIn).then(
+							() => {
+								helper.successAlert(undefined, 'ลงเวลาสำเร็จ', () => {
+									liff.closeWindow();
+									location.reload();
+								})
+							},
+							(error) => {
+								helper.failAlert(undefined, error);
+							}
+						)
+				} else {
+					helper.failAlertWithCallback('ตำแหน่งไม่ถูกต้อง', 'คุณอยู่นอกระยะที่กำหนดไว้<br/>กรุณาติดต่อฝ่ายทรัพยากรองค์กรและบุคคล');
+				}
+				
+			} else {
+				if (!this.isCheckedIn) {
+					helper.failAlert('นอกระยะเวลา', `กรุณาลงเวลาเข้าในช่วง ${this.startCheckIn}.00 - ${this.endCheckIn - 1}.59 นาฬิกา`)
+				} else {
+					helper.failAlert('นอกระยะเวลา', `กรุณาลงเวลาออกในช่วง ${this.startCheckOut}.00 - ${this.endCheckOut - 1}.59 นาฬิกา`)
+				}
 			}
 		}
 	},

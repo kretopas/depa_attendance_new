@@ -33,7 +33,8 @@ export default {
     },
     getDefaultProfile() {
       const userProfile = {
-        "userId": "U361b95372da95dd8aa5e08959baa3f7d",
+        //"userId": "U361b95372da95dd8aa5e08959baa3f7d",
+        "userId": "U361b95372da95dd8aa5e08959baa3f7c",
         "displayName": "OhM ♎",
         "statusMessage": "nursing a snake in my bosom",
         "pictureUrl": "https://profile.line-scdn.net/0hPkZr57F_D0R3Cxrb6apxOwdbDC5UelZWDDlAckYNUCdKbktHU2sTIUsOU3VOaB8XDzgTKkQNAnN7GHgiaV3zcHA7UXNOPEsTU21GpA"
