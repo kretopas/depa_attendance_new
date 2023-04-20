@@ -92,22 +92,25 @@ export default {
 	async mounted() {
 		try {
 			helper.loadingAlert("กำลังตรวจสอบตำแหน่งปัจจุบัน");
-			const { coords } = await getCurrentLocationWithTimeout()
-			const position = {lat: coords.latitude, lng: coords.longitude};
-			this.positionCurrent = position;
-			this.isMapChecked = true;
-			AttendanceService.getAllLocation().then(
-				(locations) => {
-					locations.forEach((location) => {
-						this.circlePositions.push({lat: parseFloat(location.latitude), lng: parseFloat(location.longitude)});
-					})
-				},
-				(error) => {
-					helper.failAlert(undefined, error);
-				}
-			)
-			helper.closeAlert();
-			this.checkUser();
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition((result) => {
+					const position = {lat: result.coords.latitude, lng: result.coords.longitude};
+					this.positionCurrent = position;
+					this.isMapChecked = true;
+					AttendanceService.getAllLocation().then(
+						(locations) => {
+							locations.forEach((location) => {
+								this.circlePositions.push({lat: parseFloat(location.latitude), lng: parseFloat(location.longitude)});
+							})
+						},
+						(error) => {
+							helper.failAlert(undefined, error);
+						}
+					);
+					helper.closeAlert();
+					this.checkUser();
+				})
+			}
 		} catch (error) {
 			if (error instanceof TimeoutError) {
 				helper.failAlert("ไม่สำเร็จ", "Connection Timed Out.")
