@@ -1,5 +1,5 @@
 <template>
-	<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+	<nav class="navbar navbar-expand-lg navbar-dark bg-depa">
 		<div class="container-fluid">
 			<router-link to="/">
 				<img src="@/assets/depa_logo-nobg.png" width="30" height="30" class="d-inline-block align-top" alt="depa logo"> 
@@ -41,3 +41,18 @@ export default {
 	}
 }
 </script>
+
+<style scoped>
+.bg-depa {
+	background-color: #0c2f53;
+}
+
+a {
+	color: whitesmoke;
+	text-decoration: none;
+}
+
+a.nav-link:hover {
+	color: #ffc600;
+}
+</style>
