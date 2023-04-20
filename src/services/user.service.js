@@ -66,6 +66,17 @@ class UserService {
 			}
 		)
 	}
+
+	getLastCheckedin(userId) {
+		return api.get(`/checkUser/?userId=${userId}`).then(
+			response => {
+				return response.data.datetime;
+			},
+			() => {
+				return Promise.reject('ไม่สามารถตรวจสอบข้อมูลผู้ใช้งานได้');
+			}
+		)
+	}
 }
 
 export default new UserService();

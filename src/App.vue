@@ -70,6 +70,10 @@ nav {
   color: red;
 }
 
+.success-text {
+  color: green;
+}
+
 .form-group {
   margin-left: 10px;
   margin-bottom: 10px;
@@ -80,8 +84,13 @@ nav {
 }
 
 .btn-row {
-  margin-top: 10px;
+  display: inline-block;
+  margin-top: 20px;
   margin-bottom: 20px;
+}
+
+.btn-left {
+  float: left;
 }
 
 .form-box {

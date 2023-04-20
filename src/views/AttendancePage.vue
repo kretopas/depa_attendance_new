@@ -1,9 +1,9 @@
 <template>
 	<h1 class="page-title">{{ pageTitle }}</h1>
-	<div class="container-fluid" v-if="isMapChecked && userProfile">
-		<!--<div class="btn-row">
-			<button @click="$modal.show('coordinate-modal')" v-if="!isWFH" class="btn btn-info"> ลงทะเบียน Work from Home </button>
-		</div>-->
+	<div class="container-fluid root" v-if="isMapChecked && userProfile">
+		<div>
+			ผู้ใช้งาน: <strong>{{ userProfile.displayName }}</strong> <span v-if="userEmpCode">({{ userEmpCode }})</span>
+		</div>
 		<div class="btn-row">
 			<button type="button" class="btn btn-success btn-block" v-if="!isCheckedIn" @click="timeRecord">
 				<font-awesome-icon :icon="['fas', 'clock']"/> ลงเวลาเข้า
@@ -11,7 +11,39 @@
 			<button type="button" class="btn btn-danger btn-block" v-else @click="timeRecord">
 				<font-awesome-icon :icon="['fas', 'clock-rotate-left']"/> ลงเวลาออก
 			</button>
+			<button type="button" class="btn btn-info btn-block" v-if="!isWFH" @click="isModal = true">
+				ลงทะเบียนปฏิบัติงานนอกสถานที่
+			</button>
 		</div>
+		<teleport to="body">
+			<div class="modal" v-if="isModal">
+				<div>
+					<h2> ลงทะเบียนปฏิบัติงานนอกสถานที่ </h2>
+					<form class="form-box">
+						<div class="form-group row">
+							<label for="latitudeWFH" class="col-sm-2 col-form-label">ละติจูด</label>
+							<div class="col-sm-10">
+								<input type="text" id="latitudeWFH"
+								v-model="positionCurrent.lat" class="form-control"
+								:disabled="true" :readonly="true"/>
+							</div>
+						</div>
+						<div class="form-group row">
+							<label for="longitudeWFH" class="col-sm-2 col-form-label">ลองจิจูด</label>
+							<div class="col-sm-10">
+								<input type="text" id="longitudeWFH"
+								v-model="positionCurrent.lng" class="form-control"
+								:disabled="true" :readonly="true"/>
+							</div>
+						</div>
+					</form>
+					<div class="btn-row">
+						<button type="button" class="btn btn-success btn-block">ลงทะเบียน</button>
+						<button type="button" class="btn btn-danger btn-block" @click="isModal = false">ยกเลิก</button>
+					</div>
+				</div>
+			</div>
+		</teleport>
 		<GMapMap
 		class="map"
 		map-type-id="terrain"
@@ -32,6 +64,13 @@
 			:options="circleOptions"
 			/>
 		</GMapMap>
+		<div class="btn-row">
+			<router-link to="/history">
+				<button type="button" class="btn btn-outline-primary" v-if="userProfile" >
+					<font-awesome-icon :icon="['fas', 'clipboard']" /> ประวัติการลงเวลา
+				</button>
+			</router-link>
+		</div>
 	</div>
 </template>
 
@@ -76,9 +115,11 @@ export default {
 	data() {
 		return {
 			pageTitle: 'ลงเวลาปฏิบัติงาน',
+			userEmpCode: null,
 			isWFH: false,
 			isCheckedIn: false,
 			isMapChecked: false,
+			isModal: false,
 			positionCurrent: {},
 			positionWFH: {},
 			circlePositions: [],
@@ -126,6 +167,7 @@ export default {
 			UserService.getUser(this.userProfile.userId).then(
 				async (data) => {
 					if (data) {
+						this.userEmpCode = data.emp_code;
 						this.isCheckedIn = Boolean(parseInt(data.checked));
 						if (data.latitude_WFH != null && data.longitude_WFH != null) {
 							const position = {lat: parseFloat(data.latitude_WFH), lng: parseFloat(data.longitude_WFH)};
@@ -292,7 +334,10 @@ export default {
 					helper.failAlert('นอกระยะเวลา', `กรุณาลงเวลาออกในช่วง ${this.startCheckOut}.00 - ${this.endCheckOut - 1}.59 นาฬิกา`)
 				}
 			}
-		}
+		},
+		changeToHistory() {
+			this.$router.push("/history");
+		},
 	},
 	computed: {
 		...mapGetters(['userProfile'])
@@ -308,4 +353,28 @@ export default {
 	left: 50%;
 	transform: translateX(-50%);
 }
+
+.root {
+	position: relative;
+}
+.modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal > div {
+  background-color: #fff;
+  padding: 50px;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
 </style>

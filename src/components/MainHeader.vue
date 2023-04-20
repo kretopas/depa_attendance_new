@@ -6,10 +6,10 @@
 				<a class="navbar-brand">depa Attendance</a>
 			</router-link>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler"
-			aria-controls="navbarToggler" aria-expanded="true" aria-label="Toggle Navigation">
+			aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle Navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div class="collapse show navbar-collapse" id="navbarToggler">
+			<div class="collapse navbar-collapse" id="navbarToggler">
 				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 					<li class="nav-item">
 						<router-link to="/">
@@ -22,9 +22,6 @@
 						</router-link>
 					</li>
 				</ul>
-				<span class="navbar-text" v-if="userProfile">
-					ผู้ใช้งาน: <strong>{{ userProfile.displayName }}</strong>
-				</span>
 			</div>
 		</div>
 	</nav>
