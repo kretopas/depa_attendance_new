@@ -83,7 +83,6 @@ import { mapGetters } from 'vuex';
 import liff from '@line/liff';
 import Swal from 'sweetalert2';
 import helper from '@/helpers/helper';
-import getCurrentLocationWithTimeout, { TimeoutError } from 'get-location-with-timeout'
 import UserService from '@/services/user.service';
 import AttendanceService from '@/services/attendance.service';
 
