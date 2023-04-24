@@ -2,6 +2,9 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
+// ? vueDatepicker
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 // ? import Axios for Vue
 import VueAxios from 'vue-axios';
 import axios from 'axios';
@@ -33,6 +36,7 @@ app.use(VueGoogleMaps, {
 		language: 'th',
 	},
 })
-app.component('font-awesome-icon', FontAwesomeIcon)
+app.component('VueDatePicker', VueDatePicker);
+app.component('font-awesome-icon', FontAwesomeIcon);
 app.provide('axios', app.config.globalProperties.axios);
-app.mount("#app")
+app.mount("#app");

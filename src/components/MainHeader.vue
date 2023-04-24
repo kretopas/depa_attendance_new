@@ -21,6 +21,11 @@
 							<a class="nav-link">ประวัติการลงเวลา</a>
 						</router-link>
 					</li>
+					<li class="nav-item">
+						<router-link to="/leave">
+							<a class="nav-link">ลางาน</a>
+						</router-link>
+					</li>
 				</ul>
 			</div>
 		</div>

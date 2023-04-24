@@ -40,7 +40,8 @@ export default {
     }
   },
   mounted() {
-    this.getLineProfile();
+    //this.getLineProfile();
+    this.getDefaultProfile();
   }
 }
 </script>

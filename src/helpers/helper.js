@@ -91,6 +91,11 @@ class MainHelper {
 			confirmButtonText: 'ตกลง'
 		});
 	}
+
+
+	zeroPad(num, places) {
+		return String(num).padStart(places, '0');
+	}
 }
 
 export default new MainHelper();

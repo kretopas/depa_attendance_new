@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AttendancePage from '@/views/AttendancePage.vue';
 import HistoryPage from '@/views/HistoryPage.vue';
+import LeavePage from '@/views/LeavePage.vue';
 
 const routes = [
   {
@@ -15,6 +16,14 @@ const routes = [
     path: '/history',
     name: 'historyPage',
     component: HistoryPage,
+    meta: {
+      requiresUser: true
+    }
+  },
+  {
+    path: '/leave',
+    name: 'leavePage',
+    component: LeavePage,
     meta: {
       requiresUser: true
     }
