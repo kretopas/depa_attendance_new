@@ -38,13 +38,14 @@
 					</div>
 				</div>
 				<div class="form-group row">
-					<label for="startDate" class="col-sm-3 col-form-label">ตั้งแต่วันที่</label>
-					<div class="col-sm-3">
+					<label for="startDate" class="col-sm-3 col-form-label">ระหว่างวันที่</label>
+					<div class="col-sm-4">
 						<VueDatePicker
 						v-model="startDate"
 						:model-value="startDate"
 						timezone="Asia/Bangkok"
 						:enable-time-picker="false"
+						:format="startDateFormat"
 						:clearable="false"
 						:disabled-week-days="[6, 0]"
 						:disabled-dates="getDisabledDates"
@@ -53,13 +54,14 @@
 						@update:model-value="selectStartDate"
 						></VueDatePicker>
 					</div>
-					<label for="endDate" class="col-sm-3 col-form-label">ถึงวันที่</label>
-					<div class="col-sm-3">
+					<label for="endDate" class="col-sm-1 col-form-label">ถึง</label>
+					<div class="col-sm-4">
 						<VueDatePicker
 						v-model="endDate"
 						:model-value="endDate"
 						timezone="Asia/Bangkok"
 						:enable-time-picker="false"
+						:format="endDateFormat"
 						:clearable="false"
 						:disabled-week-days="[6, 0]"
 						:disabled-dates="getDisabledDates"
@@ -71,15 +73,29 @@
 				</div>
 				<div class="form-group row">
 					<label for="isHalfDay" class="col-sm-3 col-form-label">ครึ่งวัน</label>
-					<div class="col-sm-3">
+					<div class="col-sm-3" align="left">
 						<input type="checkbox" class="form-check-input" v-model="isHalfDay" @change="checkHalfday()"/>
 					</div>
-					<label for="selectHalfDay" class="col-sm-3 col-form-label" v-if="isHalfDay">เลือกช่วงเวลา</label>
+					<!--<label for="selectHalfDay" class="col-sm-3 col-form-label" v-if="isHalfDay">เลือกช่วงเวลา</label>
 					<div class="col-sm-3">
 						<select class="form-select"
 						v-model="selectedHalfDay" id="selectHalfDay"
 						:required="isHalfDay"
 						v-if="isHalfDay"
+						@change="changeLeaveType">
+							<option :value="null" disabled hidden>-- เลือกช่วงเวลา --</option>
+							<option v-for="(type, index) in halfDayOptions" :value="type.value" v-bind:key="index">
+								{{ type.label }} 
+							</option>
+						</select>
+					</div>-->
+				</div>
+				<div class="form-group row" v-if="isHalfDay">
+					<label for="selectHalfDay" class="col-sm-3 col-form-label">เลือกช่วงเวลา</label>
+					<div class="col-sm-3">
+						<select class="form-select"
+						v-model="selectedHalfDay" id="selectHalfDay"
+						:required="isHalfDay"
 						@change="changeLeaveType">
 							<option :value="null" disabled hidden>-- เลือกช่วงเวลา --</option>
 							<option v-for="(type, index) in halfDayOptions" :value="type.value" v-bind:key="index">
@@ -147,6 +163,9 @@ export default {
 							this.allHolidays = holidays;
 						}
 					);
+					this.startDate = new Date();
+					this.endDate = new Date();
+					this.calculateLeaveDays();
 					helper.closeAlert();
 				}
 			)
@@ -274,6 +293,16 @@ export default {
 				this.endDate = startDate;
 				this.selectEndDate(startDate);
 			}
+		},
+		dateFormatter(type) {
+			let date = new Date(this.startDate);
+			if (type === "end") {
+				date = new Date(this.endDate);
+			}
+			const day = helper.zeroPad(date.getDate(), 2);
+			const month = helper.zeroPad(date.getMonth() + 1, 2);
+			const year = date.getFullYear();
+			return `${day}/${month}/${year}`;
 		}
 	},
 	data() {
@@ -309,6 +338,12 @@ export default {
 				return date;
 			});
 			return disableDates;
+		},
+		startDateFormat() {
+			return this.dateFormatter("start");
+		},
+		endDateFormat() {
+			return this.dateFormatter("end");
 		}
 	},
 }
