@@ -28,8 +28,7 @@
 					<div class="col-sm-9">
 						<select class="form-select"
 						v-model="selectedLeaveType" id="leaveType"
-						required
-						@change="changeLeaveType">
+						required>
 							<option :value="null" disabled hidden>-- เลือกประเภทการลา --</option>
 							<option v-for="(type, index) in leaveTypeOptions" :value="type.name" v-bind:key="index">
 								{{ type.name_th }} 
@@ -63,6 +62,7 @@
 						:enable-time-picker="false"
 						:format="endDateFormat"
 						:clearable="false"
+						:disabled="isHalfDay"
 						:disabled-week-days="[6, 0]"
 						:disabled-dates="getDisabledDates"
 						auto-apply
@@ -73,30 +73,16 @@
 				</div>
 				<div class="form-group row">
 					<label for="isHalfDay" class="col-sm-3 col-form-label">ครึ่งวัน</label>
-					<div class="col-sm-3" align="left">
+					<div class="col-sm-4">
 						<input type="checkbox" class="form-check-input" v-model="isHalfDay" @change="checkHalfday()"/>
 					</div>
-					<!--<label for="selectHalfDay" class="col-sm-3 col-form-label" v-if="isHalfDay">เลือกช่วงเวลา</label>
-					<div class="col-sm-3">
-						<select class="form-select"
-						v-model="selectedHalfDay" id="selectHalfDay"
-						:required="isHalfDay"
-						v-if="isHalfDay"
-						@change="changeLeaveType">
-							<option :value="null" disabled hidden>-- เลือกช่วงเวลา --</option>
-							<option v-for="(type, index) in halfDayOptions" :value="type.value" v-bind:key="index">
-								{{ type.label }} 
-							</option>
-						</select>
-					</div>-->
 				</div>
 				<div class="form-group row" v-if="isHalfDay">
 					<label for="selectHalfDay" class="col-sm-3 col-form-label">เลือกช่วงเวลา</label>
 					<div class="col-sm-3">
 						<select class="form-select"
 						v-model="selectedHalfDay" id="selectHalfDay"
-						:required="isHalfDay"
-						@change="changeLeaveType">
+						:required="isHalfDay">
 							<option :value="null" disabled hidden>-- เลือกช่วงเวลา --</option>
 							<option v-for="(type, index) in halfDayOptions" :value="type.value" v-bind:key="index">
 								{{ type.label }} 
@@ -155,7 +141,9 @@ export default {
 					LeaveService.getLeaveQuota(this.userData.emp_code).then(
 						(quotas) => {
 							this.leaveQuotas = quotas;
-							this.leaveTypeOptions = quotas.filter(this.checkDisplay);
+							this.leaveTypeOptions = quotas.filter((type) => {
+								return type.display === true;
+							});
 						}
 					);
 					LeaveService.getHolidays().then(
@@ -165,7 +153,8 @@ export default {
 					);
 					this.startDate = new Date();
 					this.endDate = new Date();
-					this.calculateLeaveDays();
+					this.selectStartDate(this.startDate);
+					this.selectEndDate(this.endDate);
 					helper.closeAlert();
 				}
 			)
@@ -174,9 +163,6 @@ export default {
 		}
 	},
 	methods: {
-		checkDisplay(type) {
-			return type.display == true;
-		},
 		compareQuota() {
 			const remainQuotas = this.leaveQuotas.filter((leave) => {
 				return leave.name == this.selectedLeaveType;
@@ -215,11 +201,8 @@ export default {
 							request_days: this.requestDays,
 							description: this.description,
 							requester: this.userData.emp_code,
-							half_day: false
+							half_day: this.isHalfDay ? this.selectedHalfDay : false
 						};
-						if (this.isHalfDay) {
-							data.half_day = this.selectedHalfDay;
-						}
 						const formData = new FormData();
 						const json = JSON.stringify(data);
 						let fileCheck = 'withoutfile';
@@ -255,6 +238,10 @@ export default {
 		selectStartDate(date) {
 			const selectedDate = this.getStringDate(date);
 			const selectedDateTime = selectedDate+" 00:00:00";
+			if (this.isHalfDay && (this.endDate != date)) {
+				this.endDate = date;
+				this.selectEndDate(date)
+			} 
 			this.selectedStartDate = selectedDate;
 			this.selectedStartDateTime = selectedDateTime;
 			if (this.selectedStartDate && this.selectedEndDate) {
@@ -292,13 +279,12 @@ export default {
 				const startDate = new Date(this.selectedStartDate);
 				this.endDate = startDate;
 				this.selectEndDate(startDate);
+			} else if (!this.isHalfDay && (this.selectedStartDate === this.selectedEndDate)) {
+				this.calculateLeaveDays();
 			}
 		},
 		dateFormatter(type) {
-			let date = new Date(this.startDate);
-			if (type === "end") {
-				date = new Date(this.endDate);
-			}
+			const date = (type === "start") ? new Date(this.startDate) : new Date(this.endDate);
 			const day = helper.zeroPad(date.getDate(), 2);
 			const month = helper.zeroPad(date.getMonth() + 1, 2);
 			const year = date.getFullYear();
