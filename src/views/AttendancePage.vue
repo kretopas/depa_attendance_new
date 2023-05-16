@@ -5,13 +5,13 @@
 			ผู้ใช้งาน: <strong>{{ userProfile.displayName }}</strong> <span v-if="userEmpCode">({{ userEmpCode }})</span>
 		</div>
 		<div class="btn-row">
-			<button type="button" class="btn btn-success btn-block" v-if="!isCheckedIn" @click="timeRecord">
+			<button type="button" class="btn btn-success btn-block" v-if="isCheckedIn == false" @click="timeRecord">
 				<font-awesome-icon :icon="['fas', 'clock']"/> ลงเวลาเข้า
 			</button>
-			<button type="button" class="btn btn-danger btn-block" v-else @click="timeRecord">
+			<button type="button" class="btn btn-danger btn-block" v-else-if="isCheckedIn == true" @click="timeRecord">
 				<font-awesome-icon :icon="['fas', 'clock-rotate-left']"/> ลงเวลาออก
 			</button>
-			<button type="button" class="btn btn-info btn-block" v-if="!isWFH" @click="isModal = true">
+			<button type="button" class="btn btn-info btn-block" v-if="isWFH == false" @click="isModal = true">
 				<font-awesome-icon :icon="['fas', 'location-dot']"/> ปฏิบัติงานนอกสถานที่
 			</button>
 		</div>
@@ -118,8 +118,8 @@ export default {
 		return {
 			pageTitle: 'ลงเวลาปฏิบัติงาน',
 			userEmpCode: null,
-			isWFH: false,
-			isCheckedIn: false,
+			isWFH: null,
+			isCheckedIn: null,
 			isMapChecked: false,
 			isModal: false,
 			positionCurrent: {},
@@ -380,23 +380,23 @@ export default {
 	position: relative;
 }
 .modal {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.1);
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .modal > div {
-  background-color: #fff;
-  padding: 50px;
-  border-radius: 10px;
-  justify-content: center;
-  align-items: center;
+	background-color: #fff;
+	padding: 50px;
+	border-radius: 10px;
+	justify-content: center;
+	align-items: center;
 }
 
 </style>
