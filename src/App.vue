@@ -40,7 +40,8 @@ export default {
     }
   },
   mounted() {
-    this.getLineProfile();
+    //this.getLineProfile();
+    this.getDefaultProfile();
   }
 }
 </script>
@@ -70,6 +71,10 @@ nav {
   color: green;
 }
 
+.warning-text {
+  color: #e67e00;
+}
+
 .form-group {
   margin-left: 10px;
   margin-bottom: 10px;
@@ -90,8 +95,14 @@ nav {
   float: left;
 }
 
+.btn-right {
+  float: right;
+  margin: 10px;
+}
+
 .form-box {
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .form-label {

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AttendancePage from '@/views/AttendancePage.vue';
 import HistoryPage from '@/views/HistoryPage.vue';
 import LeavePage from '@/views/LeavePage.vue';
+import LeaveApproveListPage from '@/views/LeaveApproveListPage.vue';
 
 const routes = [
   {
@@ -24,6 +25,14 @@ const routes = [
     path: '/leave',
     name: 'leavePage',
     component: LeavePage,
+    meta: {
+      requiresUser: true
+    }
+  },
+  {
+    path: '/leave/approve',
+    name: 'leaveApproveListPage',
+    component: LeaveApproveListPage,
     meta: {
       requiresUser: true
     }

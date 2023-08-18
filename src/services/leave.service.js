@@ -30,12 +30,48 @@ class LeaveService {
 			{ "Content-Type": "multipart/form-data" }
 		).then(response => {
 			if (response.data != false) {
-				console.log(response.data);
 				return Promise.resolve('ส่งคำขอการลาสำเร็จ')
 			} else {
 				return Promise.reject('ไม่สามารถส่งคำขอการลาได้')
 			}
 		})
+	}
+
+	getLeavePermission(emp_code) {
+		return api.post(
+			`/leave/permission`,
+			{
+				emp_code: emp_code
+			}
+		).then(response => {
+			if (response.data != false) {
+				return response.data.data;
+			} else {
+				return Promise.reject('ไม่สามารถตรวจสอบสิทธิ์การใช้งานได้');
+			}
+		})
+	}
+	
+	getLeaveApprovalList(emp_code) {
+		return api.get(
+			`/leave/list/approve/${emp_code}`
+		).then(response => {
+			if (response.data != false) {
+				return response.data.data;
+			} else {
+				return Promise.reject('ไม่สามารถดึงข้อมูลการขออนุมัติการลาได้')
+			}
+		})
+	}
+
+	approveLeaveRequest(requestID) {
+		console.log(requestID);
+	}
+
+	rejectLeaveRequest(requestID, remark) {
+		console.log(requestID);
+		console.log(remark);
+		return Promise.resolve("TEST");
 	}
 }
 

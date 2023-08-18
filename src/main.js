@@ -16,13 +16,14 @@ import 'bootstrap/dist/js/bootstrap.js';
 // ? import the fontawesome
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faClock, faClockRotateLeft, faChevronLeft, faClipboard, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { faClock, faClockRotateLeft, faChevronLeft, faClipboard, faLocationDot, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faClock);
 library.add(faClockRotateLeft);
 library.add(faChevronLeft);
 library.add(faClipboard);
 library.add(faLocationDot);
+library.add(faInfoCircle)
 
 const app = createApp(App);
 

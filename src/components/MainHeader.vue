@@ -26,6 +26,11 @@
 							<a class="nav-link">ลางาน</a>
 						</router-link>
 					</li>
+					<!--<li class="nav-item">
+						<router-link to="/leave/approve">
+							<a class="nav-link">อนุมัติการลางาน</a>
+						</router-link>
+					</li>-->
 				</ul>
 			</div>
 		</div>
